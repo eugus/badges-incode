@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Starter Badge</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #0C0C0D;
+            color: #EDEDED;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            background-color: #0D1525;
+            border-bottom: 1px solid #EDEDED;
+        }
+
+        header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        header nav a {
+            margin-left: 20px;
+            color: #EDEDED;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #0D1525;
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .badge-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .badge-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #EDEDED;
+            object-fit: cover;
+        }
+
+        .badge-info h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #EDEDED;
+        }
+
+        .badge-info p {
+            margin: 5px 0;
+            color: #EDEDED;
+            opacity: 0.8;
+        }
+
+        .links {
+            margin: 10px 0;
+        }
+
+        .links a {
+            color: #EDEDED;
+            text-decoration: underline;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .badge-details {
+            margin-top: 20px;
+            background-color: #0C0C0D;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .badge-details h3 {
+            margin-top: 0;
+            color: #EDEDED;
+        }
+
+        .badge-details p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .download {
+            background-color: #EDEDED;
+            color: #0D1525;
+        }
+
+        .share {
+            background-color: #0D1525;
+            color: #EDEDED;
+            border: 1px solid #EDEDED;
+        }
+
+        .download:hover {
+            opacity: 0.8;
+        }
+
+        .share:hover {
+            background-color: #EDEDED;
+            color: #0D1525;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #EDEDED;
+            margin: 20px 0;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">Canvas Badges</div>
+    <nav>
+        <a href="#">Mochila</a>
+        <a href="#">Meus Caminhos</a>
+        <a href="#">Emissores Livres</a>
+    </nav>
+</header>
+
+<main>
+    <div class="badge-header">
+        <img src="badge-image.png" alt="Python Badge" class="badge-image">
+        <div class="badge-info">
+            <h1>Python Starter</h1>
+            <p>Concedido a lgustavog27@gmail.com</p>
+            <div class="links">
+                <a href="#">Ver página pública</a>
+                <span>• Público</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="badge-details">
+        <h3>Oferecido por</h3>
+        <p>Escola de Tecnologia Incode</p>
+        <h3>Emitido em</h3>
+        <p>15/08/2025</p>
+        <h3>Descrição</h3>
+        <p>Reconhecimento pela proficiência adquirida durante a trilha de aprendizado Python.</p>
+
+        <hr>
+
+        <h3>Critérios de ganho</h3>
+        <p>
+            Participar de pelo menos 75% das aulas presenciais do módulo;<br>
+            Obter aproveitamento mínimo de 70% nos desafios práticos e avaliações da trilha;<br>
+            Submeter um projeto final funcional aplicando os conceitos de variáveis, condicionais e laços de repetição;<br>
+            Participar de uma sessão de apresentação do projeto para colegas e instrutores.
+        </p>
+
+        <hr>
+
+        <h3>Narrativa</h3>
+        <p>Parabéns por ter se destacado nas disciplinas de Python e ter atingido um nível superior de proficiência.</p>
+
+        <div class="actions">
+            <button class="download">Download</button>
+            <button class="share">Compartilhar</button>
+        </div>
+    </div>
+</main>
+</body>
+</html>

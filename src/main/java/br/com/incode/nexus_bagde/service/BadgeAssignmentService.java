@@ -1,0 +1,190 @@
+package br.com.incode.nexus_bagde.service;
+
+
+import br.com.incode.nexus_bagde.dto.BadgeAssignmentDTO;
+import br.com.incode.nexus_bagde.entitys.Badge;
+import br.com.incode.nexus_bagde.entitys.BadgeAssignment;
+import br.com.incode.nexus_bagde.entitys.Student;
+import br.com.incode.nexus_bagde.repository.BadgeAssignmentRepository;
+import br.com.incode.nexus_bagde.repository.BadgeRepository;
+import br.com.incode.nexus_bagde.repository.Studentrepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.net.http.HttpHeaders;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class BadgeAssignmentService {
+
+    @Autowired
+    private BadgeAssignmentRepository badgeAssignmentRepository;
+
+    @Autowired
+    private Studentrepository studentRepository;
+
+    @Autowired
+    private BadgeRepository badgeRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public List<BadgeAssignmentDTO> getAllAssignments() {
+        return badgeAssignmentRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<BadgeAssignmentDTO> getAssignmentsByStudent(Long studentId) {
+        return badgeAssignmentRepository.findByStudentId(studentId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<BadgeAssignmentDTO> getAssignmentsByBadge(Long badgeId) {
+        return badgeAssignmentRepository.findByBadgeId(badgeId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public BadgeAssignmentDTO assignBadge(BadgeAssignmentDTO assignmentDTO) {
+        // Verificar se estudante existe
+        Student student = studentRepository.findById(assignmentDTO.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Estudante não encontrado"));
+
+        // Verificar se badge existe
+        Badge badge = badgeRepository.findById(assignmentDTO.getBadgeId())
+                .orElseThrow(() -> new RuntimeException("Badge não encontrado"));
+
+        // Verificar se já foi atribuído
+        if (badgeAssignmentRepository.existsByStudentIdAndBadgeId(
+                assignmentDTO.getStudentId(), assignmentDTO.getBadgeId())) {
+            throw new RuntimeException("Este badge já foi atribuído a este estudante");
+        }
+
+        // Criar atribuição
+        BadgeAssignment assignment = new BadgeAssignment(student, badge, assignmentDTO.getAchievementReason());
+        BadgeAssignment savedAssignment = badgeAssignmentRepository.save(assignment);
+
+        // Enviar email se solicitado
+        if (assignmentDTO.getEmailSent() != null && assignmentDTO.getEmailSent()) {
+            try {
+                emailService.sendBadgeNotification(savedAssignment);
+                savedAssignment.setEmailSent(true);
+                savedAssignment.setEmailSentAt(LocalDateTime.now());
+                savedAssignment = badgeAssignmentRepository.save(savedAssignment);
+                System.out.println("Email enviado com sucesso para: " + student.getEmail());
+                System.out.println("Token de download: " + savedAssignment.getDownloadToken());
+            } catch (Exception e) {
+                System.err.println("Erro ao enviar email: " + e.getMessage());
+            }
+        }
+
+        return convertToDTO(savedAssignment);
+    }
+
+    public void resendBadgeEmail(Long assignmentId) {
+        BadgeAssignment assignment = badgeAssignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Atribuição não encontrada"));
+
+        try {
+            // Gerar novo token se o atual expirou
+            if (!assignment.isTokenValid()) {
+                assignment.generateDownloadToken();
+                assignment = badgeAssignmentRepository.save(assignment);
+            }
+
+            emailService.sendBadgeNotification(assignment);
+
+            assignment.setEmailSent(true);
+            assignment.setEmailSentAt(LocalDateTime.now());
+            badgeAssignmentRepository.save(assignment);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao enviar email: " + e.getMessage());
+        }
+    }
+
+    public Optional<BadgeAssignment> findByDownloadToken(String token) {
+        return badgeAssignmentRepository.findByDownloadToken(token);
+    }
+
+    public BadgeAssignment updateAssignment(BadgeAssignment assignment) {
+        return badgeAssignmentRepository.save(assignment);
+    }
+
+    public void deleteAssignment(Long id) {
+        if (!badgeAssignmentRepository.existsById(id)) {
+            throw new RuntimeException("Atribuição não encontrada");
+        }
+        badgeAssignmentRepository.deleteById(id);
+    }
+
+    private BadgeAssignmentDTO convertToDTO(BadgeAssignment assignment) {
+        BadgeAssignmentDTO dto = modelMapper.map(assignment, BadgeAssignmentDTO.class);
+        dto.setStudentId(assignment.getStudent().getId());
+        dto.setBadgeId(assignment.getBadge().getId());
+        dto.setStudentName(assignment.getStudent().getName());
+        dto.setStudentEmail(assignment.getStudent().getEmail());
+        dto.setBadgeName(assignment.getBadge().getName());
+        dto.setBadgeDescription(assignment.getBadge().getDescription());
+        dto.setDownloadToken(assignment.getDownloadToken());
+        dto.setDownloadCount(assignment.getDownloadCount());
+        dto.setTokenExpiresAt(assignment.getTokenExpiresAt());
+        return dto;
+    }
+
+
+    public BadgeAssignmentDTO getAssignmentById(Long assignmentId) {
+        return badgeAssignmentRepository.findById(assignmentId)
+                .map(assignment -> {
+                    BadgeAssignmentDTO dto = modelMapper.map(assignment, BadgeAssignmentDTO.class);
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    ObjectNode openBadgeJson = mapper.createObjectNode();
+
+                    // Contexto e tipo
+                    openBadgeJson.put("@context", "https://w3id.org/openbadges/v2");
+                    openBadgeJson.put("type", "Assertion");
+                    openBadgeJson.put("id", "http://localhost:8080/api/public-assertions/" + assignment.getId() + "/open-badge");
+
+                    // Recipient
+                    ObjectNode recipientNode = openBadgeJson.putObject("recipient");
+                    recipientNode.put("type", "email");
+                    recipientNode.put("identity", assignment.getStudent().getEmail());
+                    recipientNode.put("hashed", false);
+
+                    // Badge (URL pública)
+                    openBadgeJson.put("badge", "http://localhost:8080/api/badges/" + assignment.getBadge().getId());
+
+                    // Verification
+                    ObjectNode verificationNode = openBadgeJson.putObject("verification");
+                    verificationNode.put("type", "HostedBadge");
+
+                    // IssuedOn
+                    openBadgeJson.put("issuedOn", assignment.getAssignedAt().atZone(ZoneOffset.UTC).toInstant().toString());
+
+                    // Issuer
+                    ObjectNode issuerNode = openBadgeJson.putObject("issuer");
+                    issuerNode.put("id", "https://incode-tech-school.com.br/");
+                    issuerNode.put("type", "Issuer");
+                    issuerNode.put("name", assignment.getBadge().getIssuer());
+
+                    dto.setOpenBadgeJson(openBadgeJson);
+
+                    return dto;
+                })
+                .orElseThrow(() -> new RuntimeException("Assignment não encontrado"));
+    }
+
+
+}
