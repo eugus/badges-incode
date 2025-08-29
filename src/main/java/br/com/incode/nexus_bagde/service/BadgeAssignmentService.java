@@ -164,7 +164,7 @@ public class BadgeAssignmentService {
                     recipientNode.put("hashed", false);
 
                     // Badge (URL pública)
-                    openBadgeJson.put("badge", "http://badges-incode-production.up.railway.app/api/badges" + assignment.getBadge().getId());
+                    openBadgeJson.put("badge", "http://badges-incode-production.up.railway.app/api/badges/" + assignment.getBadge().getId());
 
                     // Verification
                     ObjectNode verificationNode = openBadgeJson.putObject("verification");
