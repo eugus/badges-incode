@@ -155,7 +155,7 @@ public class BadgeAssignmentService {
                     // Contexto e tipo
                     openBadgeJson.put("@context", "https://w3id.org/openbadges/v2");
                     openBadgeJson.put("type", "Assertion");
-                    openBadgeJson.put("id", "http://localhost:8080/api/public-assertions/" + assignment.getId() + "/open-badge");
+                    openBadgeJson.put("id", "http:/badges-incode-production.up.railway.app/api/public/assertions/" + assignment.getId() + "/open-badge");
 
                     // Recipient
                     ObjectNode recipientNode = openBadgeJson.putObject("recipient");
@@ -164,7 +164,7 @@ public class BadgeAssignmentService {
                     recipientNode.put("hashed", false);
 
                     // Badge (URL pública)
-                    openBadgeJson.put("badge", "http://localhost:8080/api/badges/" + assignment.getBadge().getId());
+                    openBadgeJson.put("badge", "http://badges-incode-production.up.railway.app/api/badges" + assignment.getBadge().getId());
 
                     // Verification
                     ObjectNode verificationNode = openBadgeJson.putObject("verification");
