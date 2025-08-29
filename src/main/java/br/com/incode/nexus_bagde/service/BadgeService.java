@@ -28,8 +28,8 @@ public class BadgeService {
     @Autowired
     private ModelMapper modelMapper;
 
-    private final String uploadDir = "src/main/resources/static/badges/";
-    private final String issuerUploadDir = "src/main/resources/static/issuers/";
+    private final String badgesDir = "/home/gustavo/Documentos/nexus-bagde/uploads/badges/";
+    private final String issuersDir = "/home/gustavo/Documentos/nexus-bagde/uploads/issuers/";
 
     public List<BadgeDTO> getAllBadges() {
         return badgeRepository.findAll().stream()
@@ -58,13 +58,13 @@ public class BadgeService {
         Badge badge = modelMapper.map(badgeDTO, Badge.class);
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            String filename = saveImage(imageFile, uploadDir);
+            String filename = saveImage(imageFile, badgesDir);
             badge.setImagePath(filename); // CORRIGIDO: Salva apenas o filename
             System.out.println("Badge criado - filename salvo no banco: " + filename);
         }
 
         if (issuerImageFile != null && !issuerImageFile.isEmpty()) {
-            String filename = saveImage(issuerImageFile, issuerUploadDir);
+            String filename = saveImage(issuerImageFile, issuersDir);
             badge.setIssuerImagePath(filename); // CORRIGIDO: Salva apenas o filename
             System.out.println("Emissor criado - filename salvo no banco: " + filename);
         }
@@ -86,9 +86,9 @@ public class BadgeService {
         if (imageFile != null && !imageFile.isEmpty()) {
             // Deletar imagem antiga se existir
             if (existingBadge.getImagePath() != null) {
-                deleteImageFile(existingBadge.getImagePath(), uploadDir);
+                deleteImageFile(existingBadge.getImagePath(), badgesDir);
             }
-            String filename = saveImage(imageFile, uploadDir);
+            String filename = saveImage(imageFile, badgesDir);
             existingBadge.setImagePath(filename); // CORRIGIDO: Salva apenas o filename
             System.out.println("Badge atualizado - filename salvo no banco: " + filename);
         }
@@ -96,9 +96,9 @@ public class BadgeService {
         if (issuerImageFile != null && !issuerImageFile.isEmpty()) {
             // Deletar imagem antiga do emissor se existir
             if (existingBadge.getIssuerImagePath() != null) {
-                deleteImageFile(existingBadge.getIssuerImagePath(), issuerUploadDir);
+                deleteImageFile(existingBadge.getIssuerImagePath(), issuersDir);
             }
-            String filename = saveImage(issuerImageFile, issuerUploadDir);
+            String filename = saveImage(issuerImageFile, issuersDir);
             existingBadge.setIssuerImagePath(filename); // CORRIGIDO: Salva apenas o filename
             System.out.println("Emissor atualizado - filename salvo no banco: " + filename);
         }
@@ -112,11 +112,11 @@ public class BadgeService {
                 .orElseThrow(() -> new RuntimeException("Badge não encontrado"));
 
         if (badge.getImagePath() != null) {
-            deleteImageFile(badge.getImagePath(), uploadDir);
+            deleteImageFile(badge.getImagePath(), badgesDir);
         }
 
         if (badge.getIssuerImagePath() != null) {
-            deleteImageFile(badge.getIssuerImagePath(), issuerUploadDir);
+            deleteImageFile(badge.getIssuerImagePath(), issuersDir);
         }
 
         badgeRepository.deleteById(id);

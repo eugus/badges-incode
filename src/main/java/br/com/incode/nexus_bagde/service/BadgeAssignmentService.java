@@ -176,8 +176,8 @@ public class BadgeAssignmentService {
                     // Badge image URL
                     if (assignment.getBadge().getImagePath() != null) {
                         ObjectNode imageNode = openBadgeJson.putObject("image");
-                        imageNode.put("id", "http://badges-incode-production.up.railway.app/api/public/assertions/"
-                                + assignment.getId() + "/image");
+                        imageNode.put("id", "http://badges-incode-production.up.railway.app/api/public/assertions/badges/"
+                                + assignment.getBadge().getId() + "/image");
                     }
 
                     // Evidence / narrative
@@ -204,8 +204,8 @@ public class BadgeAssignmentService {
 
                     // Issuer image URL
                     if (assignment.getBadge().getIssuerImagePath() != null) {
-                        issuerNode.put("image", "http://badges-incode-production.up.railway.app/issuers/"
-                                + assignment.getBadge().getIssuerImagePath());
+                        issuerNode.put("image", "http://badges-incode-production.up.railway.app/api/public/assertions/issuers/"
+                                + assignment.getBadge().getId() + "/image");
                     }
 
                     // Extensions: RecipientProfile
