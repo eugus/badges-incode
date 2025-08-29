@@ -10,6 +10,7 @@ import br.com.incode.nexus_bagde.repository.BadgeRepository;
 import br.com.incode.nexus_bagde.repository.Studentrepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -148,30 +150,51 @@ public class BadgeAssignmentService {
         return badgeAssignmentRepository.findById(assignmentId)
                 .map(assignment -> {
                     BadgeAssignmentDTO dto = modelMapper.map(assignment, BadgeAssignmentDTO.class);
-
                     ObjectMapper mapper = new ObjectMapper();
                     ObjectNode openBadgeJson = mapper.createObjectNode();
 
                     // Contexto e tipo
                     openBadgeJson.put("@context", "https://w3id.org/openbadges/v2");
                     openBadgeJson.put("type", "Assertion");
-                    openBadgeJson.put("id", "http://badges-incode-production.up.railway.app/api/public/assertions/" + assignment.getId() + "/open-badge");
+                    openBadgeJson.put("id", "http://badges-incode-production.up.railway.app/api/public/assertions/"
+                            + assignment.getId() + "/open-badge");
 
                     // Recipient
                     ObjectNode recipientNode = openBadgeJson.putObject("recipient");
                     recipientNode.put("type", "email");
-                    recipientNode.put("identity", assignment.getStudent().getEmail());
-                    recipientNode.put("hashed", false);
 
-                    // Badge (URL pública)
-                    openBadgeJson.put("badge", "http://badges-incode-production.up.railway.app/api/badges/" + assignment.getBadge().getId());
+                    // Hash opcional do email
+                    String salt = UUID.randomUUID().toString().substring(0, 16);
+                    recipientNode.put("salt", salt);
+                    recipientNode.put("hashed", true);
+                    recipientNode.put("identity", "sha256$" + DigestUtils.sha256Hex(assignment.getStudent().getEmail() + salt));
+
+                    // Badge
+                    openBadgeJson.put("badge", "http://badges-incode-production.up.railway.app/api/badges/"
+                            + assignment.getBadge().getId());
+
+                    // Badge image URL
+                    if (assignment.getBadge().getImagePath() != null) {
+                        ObjectNode imageNode = openBadgeJson.putObject("image");
+                        imageNode.put("id", "http://badges-incode-production.up.railway.app/api/public/assertions/"
+                                + assignment.getId() + "/image");
+                    }
+
+                    // Evidence / narrative
+                    if (assignment.getAchievementReason() != null) {
+                        ObjectNode evidenceNode = mapper.createObjectNode();
+                        evidenceNode.put("narrative", assignment.getAchievementReason());
+                        openBadgeJson.set("evidence", mapper.createArrayNode().add(evidenceNode));
+                        openBadgeJson.put("narrative", assignment.getAchievementReason());
+                        openBadgeJson.put("revoked", false);
+                    }
+
+                    // IssuedOn
+                    openBadgeJson.put("issuedOn", assignment.getAssignedAt().atZone(ZoneOffset.UTC).toInstant().toString());
 
                     // Verification
                     ObjectNode verificationNode = openBadgeJson.putObject("verification");
                     verificationNode.put("type", "HostedBadge");
-
-                    // IssuedOn
-                    openBadgeJson.put("issuedOn", assignment.getAssignedAt().atZone(ZoneOffset.UTC).toInstant().toString());
 
                     // Issuer
                     ObjectNode issuerNode = openBadgeJson.putObject("issuer");
@@ -179,12 +202,24 @@ public class BadgeAssignmentService {
                     issuerNode.put("type", "Issuer");
                     issuerNode.put("name", assignment.getBadge().getIssuer());
 
-                    dto.setOpenBadgeJson(openBadgeJson);
+                    // Issuer image URL
+                    if (assignment.getBadge().getIssuerImagePath() != null) {
+                        issuerNode.put("image", "http://badges-incode-production.up.railway.app/issuers/"
+                                + assignment.getBadge().getIssuerImagePath());
+                    }
 
+                    // Extensions: RecipientProfile
+                    ObjectNode extensionNode = openBadgeJson.putObject("extensions:recipientProfile");
+                    extensionNode.put("name", assignment.getStudent().getName());
+                    extensionNode.put("@context", "https://openbadgespec.org/extensions/recipientProfile/context.json");
+                    extensionNode.putArray("type").add("Extension").add("extensions:RecipientProfile");
+
+                    dto.setOpenBadgeJson(openBadgeJson);
                     return dto;
                 })
                 .orElseThrow(() -> new RuntimeException("Assignment não encontrado"));
     }
+
 
 
 }

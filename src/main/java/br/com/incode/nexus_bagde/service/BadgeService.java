@@ -28,8 +28,8 @@ public class BadgeService {
     @Autowired
     private ModelMapper modelMapper;
 
-    private final String uploadDir = "uploads/badges/";
-    private final String issuerUploadDir = "uploads/issuers/";
+    private final String uploadDir = "src/main/resources/static/badges/";
+    private final String issuerUploadDir = "src/main/resources/static/issuers/";
 
     public List<BadgeDTO> getAllBadges() {
         return badgeRepository.findAll().stream()
