@@ -4,6 +4,7 @@ import br.com.incode.nexus_bagde.dto.BadgeAssignmentDTO;
 import br.com.incode.nexus_bagde.entitys.Badge;
 import br.com.incode.nexus_bagde.repository.BadgeRepository;
 import br.com.incode.nexus_bagde.service.BadgeAssignmentService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -29,8 +30,11 @@ public class PublicBadgeController {
     private final BadgeRepository badgeRepository;
 
 
-    private final String badgesDir = "/home/gustavo/Documentos/nexus-bagde/uploads/badges/";
-    private final String issuersDir = "/home/gustavo/Documentos/nexus-bagde/uploads/issuers/";
+    @Value("${uploads.badges}")
+    private String badgesDir;
+
+    @Value("${uploads.issuers}")
+    private String issuersDir;
 
     public PublicBadgeController(BadgeAssignmentService badgeAssignmentService, BadgeRepository badgeRepository) {
         this.badgeAssignmentService = badgeAssignmentService;
@@ -84,6 +88,8 @@ public class PublicBadgeController {
             throw new RuntimeException("Erro ao identificar content-type da imagem", e);
         }
     }
+
+
 
 
     @GetMapping("/issuers/{id}/image")

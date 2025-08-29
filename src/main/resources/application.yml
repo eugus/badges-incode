@@ -42,3 +42,7 @@ app:
     dir: uploads/
   badge:
     template-path: templates/badge-template.html
+
+uploads:
+  badges: uploads/badges
+  issuers: uploads/issuers

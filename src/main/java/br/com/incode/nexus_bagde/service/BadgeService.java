@@ -6,6 +6,7 @@ import br.com.incode.nexus_bagde.entitys.Badge;
 import br.com.incode.nexus_bagde.repository.BadgeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,8 +29,11 @@ public class BadgeService {
     @Autowired
     private ModelMapper modelMapper;
 
-    private final String badgesDir = "/home/gustavo/Documentos/nexus-bagde/uploads/badges/";
-    private final String issuersDir = "/home/gustavo/Documentos/nexus-bagde/uploads/issuers/";
+    @Value("${uploads.badges}")
+    private String badgesDir;
+
+    @Value("${uploads.issuers}")
+    private String issuersDir;
 
     public List<BadgeDTO> getAllBadges() {
         return badgeRepository.findAll().stream()
