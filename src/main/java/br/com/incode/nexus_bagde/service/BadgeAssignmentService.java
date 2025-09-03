@@ -173,6 +173,7 @@ public class BadgeAssignmentService {
                     openBadgeJson.put("badge", "http://badges-incode-production.up.railway.app/api/badges/"
                             + assignment.getBadge().getId());
 
+
                     // Badge image URL
                     if (assignment.getBadge().getImagePath() != null) {
                         ObjectNode imageNode = openBadgeJson.putObject("image");
@@ -189,6 +190,11 @@ public class BadgeAssignmentService {
                         openBadgeJson.put("revoked", false);
                     }
 
+                    ObjectNode criteriaNode = openBadgeJson.putObject("criteria");
+                    criteriaNode.put("id", "http://badges-incode-production.up.railway.app/api/badges/"
+                            + assignment.getBadge().getId() + "/criteria");
+                    criteriaNode.put("narrative", "O estudante completou as atividades necessárias.");
+
                     // IssuedOn
                     openBadgeJson.put("issuedOn", assignment.getAssignedAt().atZone(ZoneOffset.UTC).toInstant().toString());
 
@@ -198,7 +204,7 @@ public class BadgeAssignmentService {
 
                     // Issuer
                     ObjectNode issuerNode = openBadgeJson.putObject("issuer");
-                    issuerNode.put("id", "https://incode-tech-school.com.br/");
+                    issuerNode.put("id", assignment.getBadge().getIssuer());
                     issuerNode.put("type", "Issuer");
                     issuerNode.put("name", assignment.getBadge().getIssuer());
 
