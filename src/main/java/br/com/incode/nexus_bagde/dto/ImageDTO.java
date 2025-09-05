@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipientDTO {
-    private String type;
-    private String salt;
-    private boolean hashed;
-    private String identity;
+public class ImageDTO {
+    private String id;
 }

@@ -20,7 +20,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Value("${app.frontend-url:http://localhost:3000}")
+    @Value("${app.frontend-url:https://badge-gerador.vercel.app}")
     private String frontendUrl;
 
     public void sendBadgeNotification(BadgeAssignment assignment) throws MessagingException {

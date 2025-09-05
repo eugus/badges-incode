@@ -1,6 +1,6 @@
 package br.com.incode.nexus_bagde.controller;
 
-import br.com.incode.nexus_bagde.dto.BadgeAssignmentDTO;
+import br.com.incode.nexus_bagde.dto.AssertionDTO;
 import br.com.incode.nexus_bagde.entitys.Badge;
 import br.com.incode.nexus_bagde.repository.BadgeRepository;
 import br.com.incode.nexus_bagde.service.BadgeAssignmentService;
@@ -45,8 +45,8 @@ public class PublicBadgeController {
     @GetMapping("/{assignmentId}/open-badge")
     public ResponseEntity<?> getOpenBadge(@PathVariable Long assignmentId) {
         try {
-            BadgeAssignmentDTO dto = badgeAssignmentService.getAssignmentById(assignmentId);
-            return ResponseEntity.ok(dto.getOpenBadgeJson());
+            AssertionDTO dto = badgeAssignmentService.getAssignmentById(assignmentId);
+            return ResponseEntity.ok(dto);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
