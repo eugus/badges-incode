@@ -31,7 +31,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setTo(student.getEmail());
-        helper.setSubject("🏆 Parabéns! Você conquistou um novo badge: " + badge.getName());
+        helper.setSubject("🏆 Parabéns! Você conquistou um novo badgee: " + badge.getName());
 
         String htmlContent = buildEmailContent(student, badge, assignment, frontendUrl);
         helper.setText(htmlContent, true);
