@@ -110,7 +110,7 @@ public class BadgeController {
             return ResponseEntity.notFound().build();
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao processar dados: " + e.getMessage());
+                    .body("Erro ao processar dados : " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao atualizar badge: " + e.getMessage());
         }
